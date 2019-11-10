@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/f18600962f.js" crossorigin="anonymous"></script>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="main.css">
+    <title>Users CRUD with Firebase and Vue</title>
+</head>
+
+<body>
+    <section class="container" id="app">
+        <div class="row pt-4">
+
+            <!--Formulario para la entrada de los datos de los usuarios-->
+
+            <article class="col-12 col-md-6 col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 v-show="!editing"><i class="fas fa-user-tie mr-3"></i>Adicionar Usuario</h5>
+                        <h5 v-show="editing"><i class="fas fa-user-tie mr-3"></i>Actualizar Usuario</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="">
+                            <div class="form-group">
+                                <label for="name">Nombre</label>
+                                <input type="text" id="name" class="form-control" placeholder="Escribe un nombre"
+                                    required v-model.trim="newUser.name" @input="allowUpdate = true">
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Apellidos</label>
+                                <input type="text" id="lastname" class="form-control"
+                                    placeholder="Escribe los apellidos" required v-model.trim="newUser.lastname"
+                                    @input="allowUpdate = true">
+                            </div>
+                            <div class="form-group">
+                                <label for="name">Email</label>
+                                <input type="email" id="email" class="form-control" placeholder="Escribe un email"
+                                    required v-model="newUser.email" @input="allowUpdate = true">
+                            </div>
+                            <div class="form-group">
+                                <label for="pass">Clave</label>
+                                <div class="input-group" :class="editing ? 'disabled' : ''">
+                                    <input :type="showPass ? 'text' : 'password'" id="pass" class="form-control"
+                                        placeholder="Escribe una contraseña" required v-model="newUser.pass"
+                                        @input="allowUpdate = true">
+                                    <div class="input-group-append">
+                                        <a href="" class="btn input-group-text" @click.prevent="showPass = !showPass">
+                                            <i class="fas" :class="showPass ? 'fa-eye' : 'fa-eye-slash'"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="btn btn-success btn-block" @click.prevent="addOrUpdateUser"
+                                v-show="!editing">
+                                Adicionar
+                                <i class="fas fa-plus ml-2"></i>
+                            </button>
+                            <button class="btn btn-primary btn-block" @click.prevent="addOrUpdateUser" v-show="editing"
+                                :class="!allowUpdate ? 'disabled' : ''">
+                                Actualizar
+                                <i class="fas fa-sync ml-2"></i>
+                            </button>
+                            <button class="btn btn-danger btn-block" @click.prevent="reset(true)" v-show="editing">
+                                Cancelar
+                                <i class="fas fa-ban ml-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+
+            <!--Lista de los usuarios-->
+
+            <article class="col-12 col-md-6 col-lg-8">
+                <table class="table table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Nombre(s)</th>
+                            <th scope="col">Apellidos</th>
+                            <th scope="col">Email</th>
+                            <th scope="col" width="95" class="text-center">
+                                <i class="fas fa-tasks"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody v-if="userList.length > 0">
+                        <tr v-for="(item, index) in filterUser">
+                            <th scope="row">{{index + 1}}</th>
+                            <td>{{item.name}}</td>
+                            <td>{{item.lastname}}</td>
+                            <td><a :href="'mailto:'+ item.email">{{item.email}}</a></td>
+                            <td width="95">
+                                <a href="#" class="btn btn-sm text-secondary" @click.prevent="editUser(item)">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm text-danger" @click.prevent="deleteUser(item.email)">
+                                    <i class="fas fa-trash-alt"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <tbody v-else>
+                        <tr>
+                            <td colspan="5" class="table-danger text-center">Lo sentimos, NO existen usuarios que
+                                mostrar !!! <i class="far fa-frown"></i></td>
+                        </tr>
+                    </tbody>
+                    <tfoot class="bg-dark">
+                        <tr>
+                            <th scope="col" colspan="2">
+                                <div class="d-flex justify-content-center" v-show="userList.length < 0">
+                                    <div class="btn-group" role="group" aria-label="First group">
+                                        <button type="button" class="btn btn-sm btn-secondary">
+                                            <i class="fas fa-arrow-left"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-secondary">1</button>
+                                        <button type="button" class="btn btn-sm btn-secondary">2</button>
+                                        <button type="button" class="btn btn-sm btn-secondary">3</button>
+                                        <button type="button" class="btn btn-sm btn-secondary">4</button>
+                                        <button type="button" class="btn btn-sm btn-secondary">
+                                            <i class="fas fa-arrow-right"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </th>
+                            <td></td>
+                            <td colspan="2" class="text-white">
+                                <input type="search" v-model="filter" class="form-control form-control-sm" placeholder="Buscar">
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </article>
+
+            <pre>
+                {{$data}}
+            </pre>
+        </div>
+    </section>
+
+    <!--Se incluye Firebase Realtime Database-->
+    <script src="https://www.gstatic.com/firebasejs/7.2.2/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.2.0/firebase-database.js"></script>
+
+    <!--Se incluye Vuejs-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+    <script src="https://unpkg.com/vue-toasted"></script>
+
+    <!--Se incluye la App-->
+    <script src="app.js"></script>
+</body>
+
+</html>

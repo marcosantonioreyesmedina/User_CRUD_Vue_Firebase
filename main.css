@@ -1,0 +1,16 @@
+body {
+    font-family: 'Abel', sans-serif;
+    font-size: 1.1rem;
+}
+
+.text-yellow {
+    color: rgb(206, 76, 0);
+}
+
+.text-red {
+    color: rgb(206, 0, 0);
+}
+
+.disabled {
+    pointer-events: none;
+}
