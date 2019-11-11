@@ -2,13 +2,13 @@
 
 
 const config = {
-    apiKey: 'AIzaSyDjvrHYhhV8Olh25XXCL4pkNb61i_J8orc',
-    authDomain: 'vuexample-2019.firebaseapp.com',
-    databaseURL: 'https://vuexample-2019.firebaseio.com',
-    projectId: 'vuexample-2019',
-    storageBucket: 'vuexample-2019.appspot.com',
-    messagingSenderId: '1095716700680',
-    appId: '1:1095716700680:web:b8cd3a3f6b804d0610c7bd'
+    apiKey: '',
+    authDomain: '',
+    databaseURL: '',
+    projectId: '',
+    storageBucket: '',
+    messagingSenderId: '',
+    appId: ''
 };
 
 // Inicializando la App
